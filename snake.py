@@ -50,6 +50,68 @@ class Particle:
 particles = []
 
 # ----------------------------
+# 3D Perspective Ground (Floor) Background
+# ----------------------------
+def create_ground():
+    ground = turtle.Turtle()
+    ground.speed(0)
+    ground.penup()
+    ground.hideturtle()
+
+    horizon_y = -60
+
+    # Ground trapezoid
+    ground.color("#0b1a10")
+    ground.goto(-280, -280)
+    ground.pendown()
+    ground.begin_fill()
+    ground.goto(280, -280)
+    ground.goto(200, horizon_y)
+    ground.goto(-200, horizon_y)
+    ground.goto(-280, -280)
+    ground.end_fill()
+    ground.penup()
+
+    # Perspective lines
+    ground.color("#123322")
+    ground.width(1)
+    for x in range(-260, 261, 40):
+        ground.goto(x, -280)
+        ground.pendown()
+        ground.goto(x * 0.2, horizon_y)
+        ground.penup()
+
+    # Horizontal depth stripes
+    ground.color("#0f2a1a")
+    for y in range(-260, horizon_y, 25):
+        t = (y - (-280)) / (horizon_y - (-280))  # 0..1
+        left = -280 + (80 * t)
+        right = 280 - (80 * t)
+        ground.goto(left, y)
+        ground.pendown()
+        ground.goto(right, y)
+        ground.penup()
+
+    # Texture dots
+    ground.color("#1f5a3a")
+    for _ in range(220):
+        ry = random.randint(-275, horizon_y - 5)
+        t = (ry - (-280)) / (horizon_y - (-280))
+        spread = int(280 - (120 * t))
+        rx = random.randint(-spread, spread)
+        ground.goto(rx, ry)
+        ground.dot(random.randint(2, 4))
+
+    # Horizon glow line
+    ground.color("#00ff88")
+    ground.width(2)
+    ground.goto(-200, horizon_y)
+    ground.pendown()
+    ground.goto(200, horizon_y)
+    ground.penup()
+
+
+# ----------------------------
 # 3D-Style Animated Grid Background
 # ----------------------------
 def create_3d_grid():
@@ -73,6 +135,8 @@ def create_3d_grid():
         grid.penup()
 
 
+# Draw ground first, then grid
+create_ground()
 create_3d_grid()
 
 # Animated neon border with glow
@@ -811,7 +875,7 @@ frame_count = 0
 fps_timer = time.time()
 
 print("=" * 60)
-print("🐍 ULTRA REALISTIC NEON SNAKE - 3D EDITION 🐍")
+print("Snake Game ")
 print("=" * 60)
 print("CONTROLS:")
 print("  ⬆️ ⬇️ ⬅️ ➡️  Arrow Keys / W A S D - Move")
@@ -876,7 +940,7 @@ while True:
             if powerup.is_expired():
                 powerup.destroy()
                 powerups.remove(powerup)
-            elif snake.head.distance(powerup.t) < 24:  # smaller pickup radius
+            elif snake.head.distance(powerup.t) < 24:
                 if powerup.type == "speed":
                     delay = max(0.025, delay - 0.025)
                 elif powerup.type == "slow":
@@ -904,7 +968,6 @@ while True:
                 invincible = False
                 snake.head.color("#00ff88")
 
-        # smaller eat radius
         if snake.head.distance(food.t) < 22:
             if food.type == "normal":
                 points = 10
@@ -927,7 +990,6 @@ while True:
             new_seg.color(rainbow_colors[color_index])
             new_seg.penup()
 
-            # SMALLER body segments
             size = max(0.4, 1.3 - (len(segments) * 0.01))
             new_seg.shapesize(size, size)
             segments.append(new_seg)
@@ -960,7 +1022,7 @@ while True:
                     snake.head.sety(260 if snake.head.ycor() > 0 else -260)
 
         for segment in segments[4:]:
-            if segment.distance(snake.head) < 16:  # smaller collision radius
+            if segment.distance(snake.head) < 16:
                 if not invincible:
                     create_explosion(snake.head.xcor(), snake.head.ycor(), "#ff0000", 30)
                     show_game_over()
